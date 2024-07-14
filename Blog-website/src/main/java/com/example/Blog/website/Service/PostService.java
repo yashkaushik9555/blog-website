@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.http.ResponseEntity;
 
 import com.example.Blog.website.Dto.PostDto;
-import com.example.Blog.website.Entity.Categories;
-import com.example.Blog.website.Entity.Users;
 import com.example.Blog.website.Exception.ResponseUtil;
 
 public interface PostService {
