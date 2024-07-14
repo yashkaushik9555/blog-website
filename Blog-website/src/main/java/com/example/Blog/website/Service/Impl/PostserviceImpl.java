@@ -69,8 +69,24 @@ public class PostserviceImpl implements PostService {
 
 	@Override
 	public ResponseEntity<ResponseUtil> updatePost(PostDto PostDto, Long PostId) {
+		try {
+			Posts PostEntity = this.modelMappper.map(PostDto, Posts.class);
+			PostEntity.setModifiedDate(new Date());
+			PostEntity.setContent(PostEntity.getContent());
+			PostEntity.setDescription(PostEntity.getDescription());
+			PostEntity.setIsActive(PostEntity.getIsActive());
+			PostEntity.setTitle(PostEntity.getTitle());
+			Posts save = this.postRespo.save(PostEntity);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.SUCCESS_MESSAGE, this.modelMappper.map(save, PostDto.class), HttpStatus.OK),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
 
-		return null;
+		}
+
 	}
 
 	@Override
@@ -95,9 +111,11 @@ public class PostserviceImpl implements PostService {
 			Posts findPostById = this.postRespo.findById(postId)
 					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
 			findPostById.setIsActive("N");
-			this.postRespo.save(findPostById);
+			Posts save = this.postRespo.save(findPostById);
+
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
 					APPConstant.SUCCESS_MESSAGE, "Deleted Successfully", HttpStatus.OK), HttpStatus.OK);
+
 		} catch (Exception e) {
 			// TODO: handle exception
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
@@ -145,18 +163,6 @@ public class PostserviceImpl implements PostService {
 	}
 
 	@Override
-	public ResponseEntity<ResponseUtil> saveListOfPost(List<PostDto> listOfPosts) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ResponseEntity<ResponseUtil> searchPost(String keyWord) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public ResponseEntity<ResponseUtil> getPostByCategoryId(Long Cateid) {
 		try {
 			Categories cateFindById = this.cateRepo.findById(Cateid)
@@ -178,4 +184,15 @@ public class PostserviceImpl implements PostService {
 		}
 	}
 
+	@Override
+	public ResponseEntity<ResponseUtil> saveListOfPost(List<PostDto> listOfPosts) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ResponseEntity<ResponseUtil> searchPost(String keyWord) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
