@@ -1,0 +1,67 @@
+package com.example.Blog.website.Controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.example.Blog.website.Dto.CategoriesDto;
+import com.example.Blog.website.Dto.PostDto;
+import com.example.Blog.website.Dto.UserDto;
+import com.example.Blog.website.Service.PostService;
+
+@RestController
+@RequestMapping("/post")
+public class PostController {
+
+	@Autowired
+	private PostService postService;
+
+	@PostMapping("/create/post")
+	 public ResponseEntity<?> createPost(@RequestBody PostDto postDto) {
+		UserDto user = postDto.getUser();
+		CategoriesDto cate = postDto.getCategory();
+		long userId = user.getId();
+		long Cateid = cate.getId();
+		return new ResponseEntity<>(this.postService.createPost(postDto, userId, Cateid), HttpStatus.OK);
+
+	}
+	
+	@PostMapping("/update/{postId}")
+	 public ResponseEntity<?> updatePost(@RequestBody PostDto postDto,@PathVariable Long postId) {
+		return new ResponseEntity<>(this.postService.updatePost(postDto,postId), HttpStatus.OK);
+	}
+
+	@PostMapping("/Delete/{postId}")
+	 public ResponseEntity<?> DeletePost(@PathVariable Long postId) {
+		return new ResponseEntity<>(this.postService.deletePost(postId), HttpStatus.OK);
+	}
+	
+	@GetMapping("/getPostByUserId/{userId}")
+	  public ResponseEntity<?> getPostByUserId(@PathVariable Long userId){
+		 return new ResponseEntity<>(this.postService.getPostByUserId(userId),HttpStatus.OK);
+	 }
+	
+	@GetMapping("/getPostByCateId/{cateId}")
+	  public ResponseEntity<?> getPostByCateId(@PathVariable Long cateId){
+		 return new ResponseEntity<>(this.postService.getPostByCategoryId(cateId),HttpStatus.OK);
+	 }
+	
+		
+	@GetMapping("/getAllPost")
+	  public ResponseEntity<?> getAllPost(){
+		 return new ResponseEntity<>(this.postService.getAllPost(),HttpStatus.OK);
+	 }
+	
+	@GetMapping("/getPostByPostId/{postId}")
+	  public ResponseEntity<?> getPostByPostId(@PathVariable Long postId){
+		 return new ResponseEntity<>(this.postService.getPostByPostId(postId),HttpStatus.OK);
+	 }
+		 
+
+}

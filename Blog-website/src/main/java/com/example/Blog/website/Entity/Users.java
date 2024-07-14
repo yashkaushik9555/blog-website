@@ -54,7 +54,7 @@ public class Users {
   @Column(name="about",length = 200)
   private String about;
   
-  @Temporal(TemporalType.DATE)
+  @Temporal(TemporalType.TIMESTAMP)
   @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
   private Date date;
   

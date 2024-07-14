@@ -44,7 +44,7 @@ public class Categories {
 	@Column(name="is_active")
 	private String isActive;
 	
-	@Temporal(TemporalType.DATE)
+	@Temporal(TemporalType.TIMESTAMP)
 	@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy HH:mm:ss")
 	@Column(name="created_date")
 	private Date date;
