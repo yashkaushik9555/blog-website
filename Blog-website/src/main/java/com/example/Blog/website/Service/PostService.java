@@ -15,7 +15,7 @@ public interface PostService {
 	public ResponseEntity<ResponseUtil> getAllPost();
 	public ResponseEntity<ResponseUtil> deletePost(Long PostId);
 	public ResponseEntity<ResponseUtil> getPostByPostId(Long PostId);
-	public ResponseEntity<ResponseUtil> getPostByUserId(Users users);
+	public ResponseEntity<ResponseUtil> getPostByUserId(Long userId);
 	public ResponseEntity<ResponseUtil> getPostByCategoryId(Long Cateid);
 	public ResponseEntity<ResponseUtil>saveListOfPost(List<PostDto> listOfPosts);
 	public ResponseEntity<ResponseUtil> searchPost(String keyWord);

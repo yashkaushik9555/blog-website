@@ -2,6 +2,7 @@ package com.example.Blog.website.Service.Impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.modelmapper.ModelMapper;
@@ -30,42 +31,45 @@ public class PostserviceImpl implements PostService {
 	private ModelMapper modelMappper;
 	@Autowired
 	private UserRepo userReps;
-	
+
 	@Autowired
 	private CategoriesRepo cateRepo;
 
 	@Override
-	public ResponseEntity<ResponseUtil> createPost(PostDto PostDto,Long UserId,Long CateId) {
-		try{// TODO Auto-generated method stub
-		Users user=this.userReps.findById(UserId).orElseThrow(()->new ResourceNotFoundException("User", "Id", UserId));
-		Categories cate=this.cateRepo.findById(CateId).orElseThrow(()->new ResourceNotFoundException("Category", "CateId", CateId));
-		Posts postEntity = this.modelMappper.map(PostDto, Posts.class);
-		if(postEntity.getImageName()!=null) {
-			postEntity.setImageName(postEntity.getImageName());
-		}
-		else {
-			postEntity.setImageName("default.png");
-		}
-		postEntity.setIsActive(postEntity.getIsActive());
-		postEntity.setDescription(postEntity.getDescription());
-		postEntity.setContent(postEntity.getContent());
-		postEntity.setCreatedDate(new Date());
-		postEntity.setIsActive(postEntity.getIsActive());
-		postEntity.setUser(user);
-		postEntity.setCategory(cate);
-		postEntity.setTitle(postEntity.getTitle());
-		Posts savePost = this.postRespo.save(postEntity);
-		return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE, APPConstant.SUCCESS_MESSAGE, this.modelMappper.map(savePost, PostDto.class), HttpStatus.OK),HttpStatus.OK);
-		}
-		catch (Exception e) {
+	public ResponseEntity<ResponseUtil> createPost(PostDto PostDto, Long UserId, Long CateId) {
+		try {// TODO Auto-generated method stub
+			Users user = this.userReps.findById(UserId)
+					.orElseThrow(() -> new ResourceNotFoundException("User", "Id", UserId));
+			Categories cate = this.cateRepo.findById(CateId)
+					.orElseThrow(() -> new ResourceNotFoundException("Category", "CateId", CateId));
+			Posts postEntity = this.modelMappper.map(PostDto, Posts.class);
+			if (postEntity.getImageName() != null) {
+				postEntity.setImageName(postEntity.getImageName());
+			} else {
+				postEntity.setImageName("default.png");
+			}
+			postEntity.setIsActive(postEntity.getIsActive());
+			postEntity.setDescription(postEntity.getDescription());
+			postEntity.setContent(postEntity.getContent());
+			postEntity.setCreatedDate(new Date());
+			postEntity.setIsActive(postEntity.getIsActive());
+			postEntity.setUser(user);
+			postEntity.setCategory(cate);
+			postEntity.setTitle(postEntity.getTitle());
+			Posts savePost = this.postRespo.save(postEntity);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.SUCCESS_MESSAGE, this.modelMappper.map(savePost, PostDto.class), HttpStatus.OK),
+					HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE, APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
 	@Override
 	public ResponseEntity<ResponseUtil> updatePost(PostDto PostDto, Long PostId) {
-	
+
 		return null;
 	}
 
@@ -82,15 +86,41 @@ public class PostserviceImpl implements PostService {
 	}
 
 	@Override
-	public ResponseEntity<ResponseUtil> getPostByPostId(Long PostId) {
+	public ResponseEntity<ResponseUtil> getPostByPostId(Long postId) {
 		// TODO Auto-generated method stub
-		return null;
+		try {
+			Posts findPostById = this.postRespo.findById(postId)
+					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.STATUS_SUCCESS_MESSAGE, findPostById, HttpStatus.FOUND), HttpStatus.FOUND);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
-	public ResponseEntity<ResponseUtil> getPostByUserId(Users users) {
-		// TODO Auto-generated method stub
-		return null;
+	public ResponseEntity<ResponseUtil> getPostByUserId(Long userId) {
+		try {
+			Users findUserByUserId = this.userReps.findById(userId)
+					.orElseThrow(() -> new ResourceNotFoundException("Post", "user", userId));
+			Set<Posts> listOfPosts = this.postRespo.findByUser(findUserByUserId);
+			if (listOfPosts.size() <= 0) {
+				return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+						APPConstant.STATUS_SUCCESS_MESSAGE, "No data found", HttpStatus.NO_CONTENT),
+						HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.STATUS_SUCCESS_MESSAGE, listOfPosts.stream()
+							.map(post -> this.modelMappper.map(post, PostDto.class)).collect(Collectors.toList()),
+					HttpStatus.FOUND), HttpStatus.FOUND);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
 	}
 
 	@Override
@@ -108,14 +138,22 @@ public class PostserviceImpl implements PostService {
 	@Override
 	public ResponseEntity<ResponseUtil> getPostByCategoryId(Long Cateid) {
 		try {
-			Categories cateFindById = this.cateRepo.findById(Cateid).orElseThrow(()->new ResourceNotFoundException("Category", "Cateid", Cateid));
-		List<Posts> byCategory = this.postRespo.findByCategory(cateFindById);
-		
-		return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,APPConstant.STATUS_SUCCESS_MESSAGE,byCategory.stream().map((obj)->this.modelMappper.map(obj, PostDto.class)).collect(Collectors.toList()),HttpStatus.OK),HttpStatus.OK);
-		}
-		catch(Exception e) {
+			Categories cateFindById = this.cateRepo.findById(Cateid)
+					.orElseThrow(() -> new ResourceNotFoundException("Category", "Cateid", Cateid));
+			Set<Posts> byCategory = this.postRespo.findByCategory(cateFindById);
+			if (byCategory.size() <= 0) {
+				return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+						APPConstant.STATUS_SUCCESS_MESSAGE, "No data found", HttpStatus.NO_CONTENT),
+						HttpStatus.NO_CONTENT);
+			}
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.STATUS_SUCCESS_MESSAGE, byCategory.stream()
+							.map((obj) -> this.modelMappper.map(obj, PostDto.class)).collect(Collectors.toList()),
+					HttpStatus.OK), HttpStatus.OK);
+		} catch (Exception e) {
 			e.printStackTrace();
-			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,APPConstant.FAILED_MESSAGE,e,HttpStatus.INTERNAL_SERVER_ERROR),HttpStatus.INTERNAL_SERVER_ERROR);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 	}
 
