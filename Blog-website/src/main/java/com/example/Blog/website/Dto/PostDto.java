@@ -20,7 +20,7 @@ public class PostDto {
 	private String title;
 	
 	@Column(name="post_Description")
-	private String Description;
+	private String description;
 
 	private Date createdDate;
 
