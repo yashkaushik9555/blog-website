@@ -75,14 +75,35 @@ public class PostserviceImpl implements PostService {
 
 	@Override
 	public ResponseEntity<ResponseUtil> getAllPost() {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Set<Posts> allActivePosts = this.postRespo.findAllActivePosts();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.SUCCESS_MESSAGE, allActivePosts.stream()
+							.map(post -> this.modelMappper.map(post, PostDto.class)).collect(Collectors.toList()),
+					HttpStatus.FOUND), HttpStatus.FOUND);
+		} catch (Exception e) {
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
 	}
 
 	@Override
-	public ResponseEntity<ResponseUtil> deletePost(Long PostId) {
+	public ResponseEntity<ResponseUtil> deletePost(Long postId) {
 		// TODO Auto-generated method stub
-		return null;
+		try {
+			Posts findPostById = this.postRespo.findById(postId)
+					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
+			findPostById.setIsActive("N");
+			this.postRespo.save(findPostById);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.SUCCESS_MESSAGE, "Deleted Successfully", HttpStatus.OK), HttpStatus.OK);
+		} catch (Exception e) {
+			// TODO: handle exception
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+
+		}
 	}
 
 	@Override

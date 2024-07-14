@@ -32,7 +32,7 @@ public class Posts {
 	private String title;
 	
 	@Column(name="post_Description")
-	private String Description;
+	private String description;
 	
 	@Column(name="is_active")
 	private String isActive;
