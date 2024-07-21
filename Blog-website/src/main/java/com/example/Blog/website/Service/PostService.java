@@ -10,7 +10,7 @@ import com.example.Blog.website.Exception.ResponseUtil;
 public interface PostService {
 	public ResponseEntity<ResponseUtil> createPost(PostDto PostDto,Long userId,Long catId);
 	public ResponseEntity<ResponseUtil> updatePost(PostDto PostDto,Long PostId);
-	public ResponseEntity<ResponseUtil> getAllPost();
+	public ResponseEntity<?> getAllPost(int pageNo,int pageSize);
 	public ResponseEntity<ResponseUtil> deletePost(Long PostId);
 	public ResponseEntity<ResponseUtil> getPostByPostId(Long PostId);
 	public ResponseEntity<ResponseUtil> getPostByUserId(Long userId);

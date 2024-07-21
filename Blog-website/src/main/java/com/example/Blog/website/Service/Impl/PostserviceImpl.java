@@ -2,11 +2,16 @@ package com.example.Blog.website.Service.Impl;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -16,6 +21,7 @@ import com.example.Blog.website.Entity.Categories;
 import com.example.Blog.website.Entity.Posts;
 import com.example.Blog.website.Entity.Users;
 import com.example.Blog.website.Exception.APPConstant;
+import com.example.Blog.website.Exception.PostResponse;
 import com.example.Blog.website.Exception.ResourceNotFoundException;
 import com.example.Blog.website.Exception.ResponseUtil;
 import com.example.Blog.website.Repo.CategoriesRepo;
@@ -71,8 +77,9 @@ public class PostserviceImpl implements PostService {
 	@Override
 	public ResponseEntity<ResponseUtil> updatePost(PostDto postDto, Long postId) {
 		try {
-		
-			Posts postFindById = this.postRespo.findById(postId).orElseThrow(()->new ResourceNotFoundException("Post", "Id", postId));
+
+			Posts postFindById = this.postRespo.findById(postId)
+					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
 			postFindById.setModifiedDate(new Date());
 			postFindById.setContent(postDto.getContent());
 			postFindById.setDescription(postDto.getDescription());
@@ -92,12 +99,20 @@ public class PostserviceImpl implements PostService {
 	}
 
 	@Override
-	public ResponseEntity<ResponseUtil> getAllPost() {
+	public ResponseEntity<?> getAllPost(int pageNo,int pageSize) {
 		try {
-			Set<Posts> allActivePosts = this.postRespo.findAllActivePosts();
+			Pageable pageData=PageRequest.of(pageNo, pageSize);
+			Page<Posts> dataAccToPage = this.postRespo.findAll(pageData);
+			List<PostDto> content=dataAccToPage.stream().filter(obj->"Y".equals(obj.getIsActive()))
+			.map(post -> this.modelMappper.map(post, PostDto.class)).collect(Collectors.toList());
+			PostResponse postRes=new PostResponse();
+			postRes.setContent(content);
+			postRes.setTotalPage(dataAccToPage.getTotalElements());
+			postRes.setPageSize(dataAccToPage.getSize());
+			postRes.setLastPage(dataAccToPage.isLast());
+			
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
-					APPConstant.SUCCESS_MESSAGE, allActivePosts.stream()
-							.map(post -> this.modelMappper.map(post, PostDto.class)).collect(Collectors.toList()),
+					APPConstant.SUCCESS_MESSAGE, postRes,
 					HttpStatus.FOUND), HttpStatus.FOUND);
 		} catch (Exception e) {
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
@@ -192,8 +207,37 @@ public class PostserviceImpl implements PostService {
 
 	@Override
 	public ResponseEntity<ResponseUtil> saveListOfPost(List<PostDto> listOfPosts) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			Set<Posts> postsSet = listOfPosts.stream().map(obj -> this.modelMappper.map(obj, Posts.class))
+					.collect(Collectors.toSet());
+
+			for (Posts post : postsSet) {
+				Categories category = post.getCategory();
+				Users user = post.getUser();
+				long userId = user.getId();
+				long cateId = category.getId();
+
+				Users users = this.userReps.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "id", userId));
+				Categories cate = this.cateRepo.findById(cateId)
+						.orElseThrow(() -> new ResourceNotFoundException("Category", "id", cateId));
+                post.setUser(users);
+                post.setCategory(cate);
+				if (post.getImageName() == null || post.getImageName().isEmpty()) {
+					post.setImageName("default.png");
+				}
+				post.setCreatedDate(new Date());
+				
+			}
+			List<Posts> saveAll = this.postRespo.saveAll(postsSet);
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
+					APPConstant.STATUS_SUCCESS_MESSAGE, saveAll.stream()
+							.map((obj) -> this.modelMappper.map(obj, PostDto.class)).collect(Collectors.toList()),
+					HttpStatus.OK), HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 
 	@Override
