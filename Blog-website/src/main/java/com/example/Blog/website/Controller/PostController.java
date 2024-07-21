@@ -1,5 +1,8 @@
 package com.example.Blog.website.Controller;
 
+import java.util.List;
+
+import org.modelmapper.internal.bytebuddy.implementation.bytecode.constant.DefaultValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -8,12 +11,14 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.Blog.website.Dto.CategoriesDto;
 import com.example.Blog.website.Dto.PostDto;
 import com.example.Blog.website.Dto.UserDto;
 import com.example.Blog.website.Service.PostService;
+import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
 @RestController
 @RequestMapping("/post")
@@ -29,6 +34,12 @@ public class PostController {
 		long userId = user.getId();
 		long Cateid = cate.getId();
 		return new ResponseEntity<>(this.postService.createPost(postDto, userId, Cateid), HttpStatus.OK);
+
+	}
+	
+	@PostMapping("/saveListOfPost")
+	 public ResponseEntity<?> saveListOfPost(@RequestBody List<PostDto> postDto) {
+		return new ResponseEntity<>(this.postService.saveListOfPost(postDto), HttpStatus.OK);
 
 	}
 	
@@ -53,10 +64,13 @@ public class PostController {
 	 }
 	
 		
-	@GetMapping("/getAllPost")
-	  public ResponseEntity<?> getAllPost(){
-		 return new ResponseEntity<>(this.postService.getAllPost(),HttpStatus.OK);
-	 }
+		@GetMapping("/getAllPost")
+		public ResponseEntity<?> getAllPost(
+				@RequestParam(value = "pageNumber", defaultValue = "1", required = false) int pageNumber,
+				@RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
+
+			return new ResponseEntity<>(this.postService.getAllPost(pageNumber,pageSize), HttpStatus.OK);
+		}
 	
 	@GetMapping("/getPostByPostId/{postId}")
 	  public ResponseEntity<?> getPostByPostId(@PathVariable Long postId){
