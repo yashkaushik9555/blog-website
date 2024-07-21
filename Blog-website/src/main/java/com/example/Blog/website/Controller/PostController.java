@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Blog.website.Dto.CategoriesDto;
 import com.example.Blog.website.Dto.PostDto;
 import com.example.Blog.website.Dto.UserDto;
-import com.example.Blog.website.Exception.ConstanrValue;
+import com.example.Blog.website.Exception.ConstantValues;
 import com.example.Blog.website.Service.PostService;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
@@ -68,8 +68,8 @@ public class PostController {
 		
 		@GetMapping("/getAllPost")
 		public ResponseEntity<?> getAllPost(
-				@RequestParam(value = "pageNumber", defaultValue = ConstanrValue.defaultValue, required = false) int pageNumber,
-				@RequestParam(value = "pageSize",defaultValue= ConstanrValue.defaultValue, required = false) int pageSize) {
+				@RequestParam(value = "pageNumber", defaultValue = ConstantValues.defaultValue, required = false) int pageNumber,
+				@RequestParam(value = "pageSize",defaultValue= ConstantValues.defaultValue, required = false) int pageSize) {
 
 			return new ResponseEntity<>(this.postService.getAllPost(pageNumber,pageSize), HttpStatus.OK);
 		}
