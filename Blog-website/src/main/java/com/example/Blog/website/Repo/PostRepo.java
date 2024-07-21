@@ -1,5 +1,6 @@
 package com.example.Blog.website.Repo;
 
+import java.util.List;
 import java.util.Set;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -17,7 +18,6 @@ public interface PostRepo extends JpaRepository<Posts, Long> {
 // this is also a custom finder method to find the all post of the same category
   public Set<Posts>findByCategory(Categories cate);
   
+  public List<Posts>findByTitleContaining(String title);
   
-  @Query("SELECT p FROM Posts p WHERE p.isActive = 'Y'")
-  public Set<Posts> findAllActivePosts();
 }

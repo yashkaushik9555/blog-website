@@ -2,6 +2,7 @@ package com.example.Blog.website.Controller;
 
 import java.util.List;
 
+import org.aspectj.apache.bcel.classfile.ConstantValue;
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.constant.DefaultValue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.Blog.website.Dto.CategoriesDto;
 import com.example.Blog.website.Dto.PostDto;
 import com.example.Blog.website.Dto.UserDto;
+import com.example.Blog.website.Exception.ConstanrValue;
 import com.example.Blog.website.Service.PostService;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
@@ -66,8 +68,8 @@ public class PostController {
 		
 		@GetMapping("/getAllPost")
 		public ResponseEntity<?> getAllPost(
-				@RequestParam(value = "pageNumber", defaultValue = "1", required = false) int pageNumber,
-				@RequestParam(value = "pageSize", defaultValue = "10", required = false) int pageSize) {
+				@RequestParam(value = "pageNumber", defaultValue = ConstanrValue.defaultValue, required = false) int pageNumber,
+				@RequestParam(value = "pageSize",defaultValue= ConstanrValue.defaultValue, required = false) int pageSize) {
 
 			return new ResponseEntity<>(this.postService.getAllPost(pageNumber,pageSize), HttpStatus.OK);
 		}
@@ -76,6 +78,9 @@ public class PostController {
 	  public ResponseEntity<?> getPostByPostId(@PathVariable Long postId){
 		 return new ResponseEntity<>(this.postService.getPostByPostId(postId),HttpStatus.OK);
 	 }
-		 
+	@GetMapping("/searchByPostTitle/{keyword}")
+	  public ResponseEntity<?> searchByPostTitle(@PathVariable String keyword){
+		 return new ResponseEntity<>(this.postService.searchPost(keyword),HttpStatus.OK);
+	 }
 
 }

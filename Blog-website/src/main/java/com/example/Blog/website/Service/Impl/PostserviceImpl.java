@@ -242,7 +242,18 @@ public class PostserviceImpl implements PostService {
 
 	@Override
 	public ResponseEntity<ResponseUtil> searchPost(String keyWord) {
-		// TODO Auto-generated method stub
-		return null;
+		try {
+			List<Posts> byTitleContaining = this.postRespo.findByTitleContaining(keyWord);
+			return new ResponseEntity<ResponseUtil>(
+					new ResponseUtil(APPConstant.SUCCESS_MESSAGE, APPConstant.SUCCESS_MESSAGE,
+							byTitleContaining.stream().map(obj -> this.modelMappper.map(obj, PostDto.class))
+									.collect(Collectors.toList()),
+							HttpStatus.OK),
+					HttpStatus.OK);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
+					APPConstant.FAILED_MESSAGE, e, HttpStatus.INTERNAL_SERVER_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
 	}
 }
