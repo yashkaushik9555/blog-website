@@ -1,10 +1,12 @@
 package com.example.Blog.website.Controller;
 
+import java.io.IOException;
 import java.util.List;
 
 import org.aspectj.apache.bcel.classfile.ConstantValue;
 import org.modelmapper.internal.bytebuddy.implementation.bytecode.constant.DefaultValue;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,11 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.example.Blog.website.Dto.CategoriesDto;
 import com.example.Blog.website.Dto.PostDto;
 import com.example.Blog.website.Dto.UserDto;
 import com.example.Blog.website.Exception.ConstantValues;
+import com.example.Blog.website.Exception.ResponseUtil;
+import com.example.Blog.website.Service.FileService;
 import com.example.Blog.website.Service.PostService;
 import com.fasterxml.jackson.databind.ser.std.StdKeySerializers.Default;
 
@@ -28,6 +33,12 @@ public class PostController {
 
 	@Autowired
 	private PostService postService;
+	
+	@Autowired
+	private FileService fileService;
+	
+	@Value("${project.image}")
+	private String path;
 
 	@PostMapping("/create/post")
 	 public ResponseEntity<?> createPost(@RequestBody PostDto postDto) {
@@ -82,5 +93,18 @@ public class PostController {
 	  public ResponseEntity<?> searchByPostTitle(@PathVariable String keyword){
 		 return new ResponseEntity<>(this.postService.searchPost(keyword),HttpStatus.OK);
 	 }
+	
+	// post image upload
+	@PostMapping("/image/upload/{postId}")
+	public ResponseEntity<?> uploadImage(@RequestParam("image") MultipartFile image
+			,@PathVariable("postId") long postId) throws IOException{
+		ResponseEntity<ResponseUtil> postByPostId = this.postService.getPostByPostId(postId);
+		String uploadImage = this.fileService.uploadImage(path, image);
+		ResponseUtil body = postByPostId.getBody();
+		PostDto postDto = (PostDto) body.getData();
+		postDto.setImageName(uploadImage);
+		return new ResponseEntity<>(this.postService.updatePost(postDto, postId),HttpStatus.OK);
+		
+	}
 
 }

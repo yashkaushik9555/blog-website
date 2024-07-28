@@ -128,7 +128,7 @@ public class PostserviceImpl implements PostService {
 			Posts findPostById = this.postRespo.findById(postId)
 					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
 			findPostById.setIsActive("N");
-			Posts save = this.postRespo.save(findPostById);
+			this.postRespo.save(findPostById);
 
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
 					APPConstant.SUCCESS_MESSAGE, "Deleted Successfully", HttpStatus.OK), HttpStatus.OK);
@@ -147,8 +147,9 @@ public class PostserviceImpl implements PostService {
 		try {
 			Posts findPostById = this.postRespo.findById(postId)
 					.orElseThrow(() -> new ResourceNotFoundException("Post", "Id", postId));
+			
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
-					APPConstant.STATUS_SUCCESS_MESSAGE, findPostById, HttpStatus.FOUND), HttpStatus.FOUND);
+					APPConstant.STATUS_SUCCESS_MESSAGE, this.modelMappper.map(findPostById, PostDto.class), HttpStatus.FOUND), HttpStatus.FOUND);
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.FAILED_MESSAGE,
