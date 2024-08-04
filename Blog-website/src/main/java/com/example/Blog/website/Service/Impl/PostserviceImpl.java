@@ -85,6 +85,7 @@ public class PostserviceImpl implements PostService {
 			postFindById.setDescription(postDto.getDescription());
 			postFindById.setIsActive(postDto.getIsActive());
 			postFindById.setTitle(postDto.getTitle());
+			postFindById.setImageName(postDto.getImageName());
 			Posts save = this.postRespo.save(postFindById);
 			return new ResponseEntity<ResponseUtil>(new ResponseUtil(APPConstant.SUCCESS_MESSAGE,
 					APPConstant.SUCCESS_MESSAGE, this.modelMappper.map(save, PostDto.class), HttpStatus.OK),
