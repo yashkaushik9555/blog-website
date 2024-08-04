@@ -11,6 +11,11 @@ import java.util.UUID;
 
 import javax.annotation.processing.FilerException;
 
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -46,5 +51,23 @@ public class FileServiceImpl implements FileService {
 		InputStream is =new FileInputStream(fullpath);
 		return is;
 	}
+
+
+	@Override
+	public ResponseEntity<?> downloadPDF(String filePath) throws IOException {
+		File file =new File(filePath);
+		if(!file.exists()) {
+			return new ResponseEntity<>("File not found",HttpStatus.NO_CONTENT);
+		}
+		InputStreamResource ips=new InputStreamResource(new FileInputStream(file));
+		HttpHeaders header= new HttpHeaders();
+		header.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + ips.getFilename() + "\"");
+		
+		 return ResponseEntity.ok()
+	                .headers(header)
+	                .contentLength(file.length())
+	                .contentType(MediaType.APPLICATION_PDF)
+	                .body(ips);
+	    }
 
 }
